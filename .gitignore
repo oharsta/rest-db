@@ -1,0 +1,9 @@
+target
+bin
+build
+.idea
+*.iml
+*.project
+mem.*
+
+

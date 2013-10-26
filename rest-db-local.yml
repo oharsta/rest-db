@@ -1,0 +1,10 @@
+http:
+  port: 8080
+  adminPort: 8081
+
+db:
+  driverClassName: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/zilverline_dev
+  username: root
+  password:
+   
