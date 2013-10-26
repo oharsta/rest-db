@@ -1,6 +1,6 @@
 # Introduction
 
-The drop wizard rest-db application was developed for a workshop / training about REST. It was subsequently used as a generic backend API in a training teaching the JavaScript development workflow [yeoman](http://yeoman.io/) and the JavaScript frameworks [AngularJS](http://angularjs.org/) and [Ember](http://emberjs.com/).
+The drop wizard rest-db application was developed for a workshop / training about REST. It was subsequently used as a generic table- and db-agnostic backend API in a training teaching the JavaScript development workflow [yeoman](http://yeoman.io/) and the JavaScript frameworks [AngularJS](http://angularjs.org/) and [Ember](http://emberjs.com/).
 
 # Overview
 
