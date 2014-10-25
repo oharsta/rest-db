@@ -29,6 +29,10 @@ The list of tables of your database is listed. You then can list the contents of
 * http://localhost:8080/rest/${table_name}
 * http://localhost:8080/rest/${table_name}/${id}
 
+Or query for specific records:
+
+* http://localhost:8080/rest/${table_name}?${column}=${column_value}&${column2}=${column2_value}
+
 And POST / PATCH updates (with either [curl](http://curl.haxx.se/) or [Postmen](http://www.getpostman.com/)) at:
 
 * http://localhost:8080/rest/${table_name}
