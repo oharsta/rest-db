@@ -18,9 +18,7 @@
  */
 package com.zilverline.rest.db;
 
-import com.google.common.cache.CacheBuilderSpec;
 import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.auth.oauth.OAuthProvider;
 import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;

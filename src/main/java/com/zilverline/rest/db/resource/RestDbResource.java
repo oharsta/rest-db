@@ -12,8 +12,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import javax.sql.DataSource;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,7 +46,10 @@ public class RestDbResource {
         final List<String> result = new ArrayList<>();
         ResultSet tables = connection.getMetaData().getTables(null, null, null, null);
         while (tables.next()) {
-          result.add(tables.getString(3));
+          String kind = tables.getString(4);
+          if (kind != null && kind.equalsIgnoreCase("TABLE")) {
+            result.add(tables.getString(3));
+          }
         }
         return result;
       }
@@ -53,8 +58,9 @@ public class RestDbResource {
 
   @GET
   @Path("/{object}")
-  public Response getAll(@PathParam("object") String table) {
-    return Response.ok(template.queryForList("select * from " + table)).build();
+  public Response getAll(@PathParam("object") String table, @Context UriInfo ui) {
+    StringBuilder whereClause = getQueryClause(ui);
+    return Response.ok(template.queryForList("select * from " + table + whereClause)).build();
   }
 
   @GET
@@ -85,6 +91,23 @@ public class RestDbResource {
     return get(table, keyHolder.getKey().longValue());
   }
 
+  private StringBuilder getQueryClause(UriInfo ui) {
+    StringBuilder whereClause = new StringBuilder(" where 1 = 1");
+    Set<Map.Entry<String, List<String>>> entries = ui.getQueryParameters().entrySet();
+    for (Map.Entry<String, List<String>> entry : entries) {
+      whereClause.append(" and (");
+      ListIterator<String> iterator = entry.getValue().listIterator();
+      while (iterator.hasNext()) {
+        whereClause.append(entry.getKey() + " = '" + iterator.next() + "'");
+        if (iterator.hasNext()) {
+          whereClause.append(" or ");
+        }
+      }
+      whereClause.append(") ");
+    }
+    return whereClause;
+  }
+
   private String getUpdateStatement(String table, Set<String> keys) {
     StringBuilder sql = new StringBuilder("update " + table + " set ");
     Map<String, String> joinedMap = new HashMap<>();
@@ -109,7 +132,7 @@ public class RestDbResource {
 
   private long getPk(Map<String, ?> data) {
     Object id = data.get("ID");
-    return id instanceof Long ? (Long) id : (id instanceof String ? Long.valueOf((String) id) : null);
+    return id instanceof Number ? ((Number) id).longValue() : (id instanceof String ? Long.valueOf((String) id) : null);
   }
 
   private static BasicDataSource dataSource(DbConfiguration db) {

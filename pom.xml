@@ -25,6 +25,7 @@
         <jetty-maven-plugin.version>8.1.4.v20120524</jetty-maven-plugin.version>
         <cglib.version>2.2.2</cglib.version>
         <mysql.version>5.1.20</mysql.version>
+        <postgresql.version>9.1-901.jdbc4</postgresql.version>
         <hsqldb.version>2.2.8</hsqldb.version>
         <slf4j.version>1.7.2</slf4j.version>
         <flyway.version>2.1.1</flyway.version>
@@ -121,6 +122,11 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

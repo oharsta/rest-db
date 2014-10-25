@@ -3,8 +3,17 @@ http:
   adminPort: 8081
 
 db:
-  driverClassName: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost:3306/zilverline_dev
-  username: root
+#  driverClassName: com.mysql.jdbc.Driver
+#  url: jdbc:mysql://localhost:3306/zilverline_dev
+#  username: root
+#  password:
+  # driverClassName: org.postgresql.Driver
+  # url: jdbc:postgresql://localhost:5432/lightweight360_dev
+  # username: postgres
+  # password:
+  driverClassName: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/ripe-portal-dev
+  username: lirportal
   password:
-   
+
+

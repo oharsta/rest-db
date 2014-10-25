@@ -1,26 +1,28 @@
 package com.zilverline.rest.db.resource;
 
 import com.googlecode.flyway.core.Flyway;
-import com.zilverline.rest.db.DbConfiguration;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.junit.*;
-import org.junit.rules.ExpectedException;
-import org.springframework.core.io.ClassPathResource;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-
+import javax.ws.rs.core.UriInfo;
 import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RestDbResourceTest {
 
@@ -29,8 +31,8 @@ public class RestDbResourceTest {
   private RestDbResource resource;
 
   private final ObjectMapper objectMapper = new ObjectMapper().enable(
-          DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY).setSerializationInclusion(
-          JsonSerialize.Inclusion.NON_NULL);
+      DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY).setSerializationInclusion(
+      JsonSerialize.Inclusion.NON_NULL);
 
   @Test
   public void testMeta() throws Exception {
@@ -40,11 +42,26 @@ public class RestDbResourceTest {
 
   @Test
   public void testGetAll() throws Exception {
-    List entity = (List) resource.getAll(HOUSES).getEntity();
+    UriInfo uriInfo = mock(UriInfo.class);
+    when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedMapImpl());
+    List entity = (List) resource.getAll(HOUSES, uriInfo).getEntity();
     assertEquals(2, entity.size());
 
     String houses = this.objectMapper.writeValueAsString(entity);
     assertTrue(houses.contains("some desc"));
+    assertTrue(houses.contains("some other desc"));
+  }
+
+  @Test
+  public void testGetWithWhereClause() throws Exception {
+    UriInfo uriInfo = mock(UriInfo.class);
+    MultivaluedMapImpl queryParameters = new MultivaluedMapImpl();
+    queryParameters.add("description", "some other desc");
+    when(uriInfo.getQueryParameters()).thenReturn(queryParameters);
+    List entity = (List) resource.getAll(HOUSES, uriInfo).getEntity();
+    assertEquals(1, entity.size());
+
+    String houses = this.objectMapper.writeValueAsString(entity);
     assertTrue(houses.contains("some other desc"));
   }
 
@@ -80,7 +97,7 @@ public class RestDbResourceTest {
   public void testSave() throws Exception {
     Map<String, Object> house = new HashMap<>();
     //driver will do the type conversions
-    house.put("description","new desc" );
+    house.put("description", "new desc");
     house.put("price", "77.77");
     house.put("creation_date", "2013-10-25 09:18:10.35");
     house = (Map<String, Object>) resource.save(HOUSES, house).getEntity();
@@ -92,8 +109,9 @@ public class RestDbResourceTest {
   @Before
   public void before() throws Exception {
     DataSource ds = dataSource();
-    this.resource = restDbResource(ds);
-    insertTestData(ds);
+    this.resource = new RestDbResource(ds);
+    Flyway flyway = flyway(ds);
+    flyway.migrate();
   }
 
   @After
@@ -107,21 +125,12 @@ public class RestDbResourceTest {
     FileUtils.deleteDirectory(new File("./target/db"));
   }
 
-  private RestDbResource restDbResource(DataSource ds) {
-    return new RestDbResource(ds);
-  }
-
   private Flyway flyway(DataSource dataSource) {
     Flyway flyway = new Flyway();
     flyway.setInitOnMigrate(true);
     flyway.setDataSource(dataSource);
     flyway.setLocations("db/hsqldb/migrations");
     return flyway;
-  }
-
-  private void insertTestData(DataSource ds) throws IOException {
-    Flyway flyway = flyway(ds);
-    flyway.migrate();
   }
 
   private DataSource dataSource() {
